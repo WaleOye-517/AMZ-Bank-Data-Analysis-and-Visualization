@@ -1,0 +1,138 @@
+import numpy as np
+import pandas as pd
+
+df=pd.read_excel('C:\Users\hp\Desktop\Data Science\Project 1\ANZ synthesised transaction dataset.xlsx',
+   'tran',index_col =None,na_values=['NA'])-Read the data from where it was stored.
+print df
+
+dk=df.copy()-To make a copy of the Data to work on.
+
+dk.count()-To know how many rows of data I have.
+
+dk.notnull().sum() OR dk.isna().sum()-To know how many rows of real values(null values) I have to know the columns to be dropped(Data Cleaning).
+
+dk.first_name.nunique()- To know the number of individual people making transactions
+
+ud=dk.first_name.unique()
+print ud - To have a list of the names of customers.
+
+dm=dk.groupby('first_name').count()
+print dm - To visualize how many transactions each individual made during the period of interest.
+
+dk[dk['txn_description'].isin(['INTER BANK','PAYMENT','PHONE BANK'])]
+dk[dk['merchant_long_lat'].isin([np.nan])] - This helped me to gain insight to why some of the columns had null values.
+
+dk[dk['txn_description'].isin(['INTER BANK','PAYMENT','PHONE BANK'])]
+dk[dk['merchant_long_lat'].isin([np.nan])].count() - This also helped me to gain insight to why some of the columns had null values.
+
+
+dk.drop(['bpay_biller_code','merchant_id','merchant_code','merchant_suburb',
+        'merchant_state','merchant_long_lat','card_present_flag'],axis=1,inplace=True)- This code is to drop the columns with null values(Data Cleaning).
+
+dk.isna().sum() - This is to check for null values after I dropped the selected columns.
+
+dk.amount.describe() - This is to find the average transaction amount and other intersting values e.g Standard deviation,Interquartile ranges,Minimum value etc 
+
+de = dk.set_index(['extraction'])- This code is to set the Extraction column as the index for easier analysis.
+ 
+aug = de.amount.loc['2018-08-01T00:00:00.000+0000':'2018-09-01T00:00:00.000+0000'].count()
+print aug
+sep = de.amount.loc['2018-09-01T00:00:00.000+0000':'2018-10-01T00:00:00.000+0000'].count()
+print sep
+oct = de.amount.loc['2018-10-01T00:00:00.000+0000':'2018-11-01T00:00:00.000+0000'].count()
+print oct
+average_transaction_monthly = (aug+sep+oct)/3
+print average_transaction_monthly - To find the volume of transactions monthly and the average.
+
+de.loc['2018-08-01T00:00:00.000+0000':'2018-08-02T00:00:00.000+0000'] - To visualize the data of an average day.
+average_day_volume=de.amount.loc['2018-08-01T00:00:00.000+0000':'2018-08-02T00:00:00.000+0000'].count()
+print "{:,} Transactions".format(average_day_volume)
+average_day_total=de.amount.loc['2018-08-01T00:00:00.000+0000':'2018-08-02T00:00:00.000+0000'].sum()
+print  "{:,} AUD".format(average_day_total)
+average_day_analysis=de.amount.loc['2018-08-01T00:00:00.000+0000':'2018-08-02T00:00:00.000+0000'].describe()
+print average_day_analysis - To find the volume,total amount and analysis of an average day.
+
+de.loc['2018-10-01T00:00:00.000+0000':'2018-10-08T00:00:00.000+0000'] - To visualize the data of an average week.
+average_week_volume=de.amount.loc['2018-10-01T00:00:00.000+0000':'2018-10-08T00:00:00.000+0000'].count()
+print  "{:,} Transactions".format(average_week_volume)
+average_week_total=de.amount.loc['2018-10-01T00:00:00.000+0000':'2018-10-08T00:00:00.000+0000'].sum()
+print  "{:,} AUD".format(average_week_total)
+average_week_analysis = de.amount.loc['2018-10-01T00:00:00.000+0000':'2018-10-08T00:00:00.000+0000'].describe()
+print average_week_analysis - To find the volume,total amount and analysis of an average week.
+
+de.loc['2018-09-01T00:00:00.000+0000':'2018-10-01T00:00:00.000+0000'] - To visualize the data of an average month.
+average_month_volume = de.amount.loc['2018-09-01T00:00:00.000+0000':'2018-10-01T00:00:00.000+0000'].count()
+print  "{:,} Transactions".format(average_month_volume)
+average_month_total = de.amount.loc['2018-09-01T00:00:00.000+0000':'2018-10-01T00:00:00.000+0000'].sum()
+print "{:,} AUD".format(average_month_total)
+average_month_analysis = de.amount.loc['2018-09-01T00:00:00.000+0000':'2018-10-01T00:00:00.000+0000'].describe()
+print average_month_analysis -  To find the volume,total amount and analysis of an average month.
+
+print de - To visualize the data of the entire data set with Extraction Date and Time as Index
+ANZ_volume = de.amount.count()
+print "{:,} Transactions".format(ANZ_volume)
+ANZ_total = de.amount.sum()
+print "{:,} AUD".format(ANZ_total)
+ANZ_analysis = de.amount.describe()
+print ANZ_analysis - To find the volume,total amount and analysis of the entire dataset.
+
+q3 = dk.amount.quantile(.75)
+print q3
+q1=dk.amount.quantile(.25)
+print q1
+iqr = q3 - q1
+print iqr
+low_outliers = q1 - (1.5*iqr)
+print low_outliers
+high_outliers = q3 + (1.5*iqr)
+print high_outliers - To find the outliers with mathematical formula
+
+outliers=dk[dk['amount']>110.1375]
+print outliers - To visualize the outlier data
+
+outliers_volume=outliers.amount.count()
+print "{:,} Transactions".format(outliers_volume)
+outlier_total_amount = outliers.amount.sum()
+print "{:,} AUD".format(outlier_total_amount)
+outliers_analysis=outliers.amount.describe()
+print outliers_analysis - To find the volume,total amount and analysis of the outliers.
+
+real_data=dk[dk['amount']<110.1375]
+print real_data - To visualize the normal data
+
+real_data_volume=real_data.amount.count()
+print "{:,} Transactions".format(real_data_volume)
+real_data_amount = real_data.amount.sum()
+print "{:,} AUD".format(real_data_amount)
+real_data_analysis = real_data.amount.describe()
+print real_data_analysis - To find the volume,total amount and analysis of the normal data.
+
+from __future__ import division
+
+percentage_of_outliers_volume = (outliers_volume / ANZ_volume)*100
+print "{} %".format(percentage_of_outliers_volume)
+percentage_of_outliers_amount = (outlier_total_amount / ANZ_total)*100
+print "{} %".format(percentage_of_outliers_amount)-To gain insight on the effects of the outliers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
